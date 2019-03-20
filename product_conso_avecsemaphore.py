@@ -1,9 +1,24 @@
 from threading import *
 from random import randrange
-# from time import sleep
+
+
+class Buffer:
+
+    def __init__(self, maxi):
+        self.maximum = maxi
+        self.queue = []
+
+    def push(self, objet):
+        if len(self.queue) == self.maximum:
+            raise IndexError("The buffer is already full")
+        self.queue.append(objet)
+
+    def pop(self):
+        return self.queue.pop()
+
 
 MAX = 100
-buffer = []
+buffer = Buffer(MAX)
 mutex = Semaphore(1)
 places = Semaphore(MAX)
 articles = Semaphore(0)
@@ -20,7 +35,7 @@ class Producteur(Thread):
     @staticmethod
     def deposer(objet):
         print("Producteur2 : ", objet)
-        buffer.append(objet)
+        buffer.push(objet)
 
     def run(self):
         while True:
@@ -30,7 +45,6 @@ class Producteur(Thread):
             self.deposer(objet)
             mutex.release()
             articles.release()
-            # sleep(2)
 
 
 class Consommateur(Thread):
@@ -53,7 +67,6 @@ class Consommateur(Thread):
             mutex.release()
             places.release()
             self.consommer(objet)
-            # sleep(4)
 
 
 if __name__ == "__main__":
